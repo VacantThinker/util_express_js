@@ -1,0 +1,24 @@
+{
+  "name": "@vacantthinker/util_express_js",
+  "version": "1.0.0",
+  "description": " util express js",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/VacantThinker/util_express_js.git"
+  },
+  "keywords": [
+    "util",
+    "express",
+    "js"
+  ],
+  "author": {
+    "name": "VacantThinker"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/VacantThinker/util_express_js/issues"
+  },
+  "homepage": "https://github.com/VacantThinker/util_express_js#readme"
+}
