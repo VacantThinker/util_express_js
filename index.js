@@ -1,6 +1,10 @@
 function geneText(
-    nameRouter = 'router',
+    nameRouter = null,
     logIt = false) {
+
+  if (nameRouter === null) {
+    nameRouter = 'router'
+  }
 
   const fs = require('fs');
   const path = require('path');
@@ -11,7 +15,7 @@ function geneText(
     values.forEach((value) => {
       textArr.push(value);
       textArr.push(lineEnter);
-    })
+    });
   };
 
   textArr.pushItem(`function setupRouterList(app, passdata) {`);
@@ -41,7 +45,8 @@ function geneText(
   }, '');
 
   if (logIt) {
-    console.log(`reduce\n`, reduce);
+    console.log(`reduce`);
+    console.log(reduce);
   }
 
   return reduce;
@@ -49,12 +54,17 @@ function geneText(
 
 function writeTextToFile(
     filename = 'util.express.js',
-    data = geneText()) {
+    data = null,
+    logIt = false) {
+
+  if (data === null) {
+    data = geneText(null, logIt);
+  }
 
   const fs = require('fs');
   const path = require('path');
-  fs.writeFileSync(path.join(filename), '')
-  fs.writeFileSync(path.join(filename), data)
+  fs.writeFileSync(path.join(filename), '');
+  fs.writeFileSync(path.join(filename), data);
 }
 
 /**
@@ -63,17 +73,46 @@ function writeTextToFile(
  *
  * and your router file like this
  *
- * eg: user.router.js
+ * eg: router/user.router.js
+ *
+ *     router/xxxx.router.js
+ *
+ *
+ * read router/ dir,
+ *
+ * gene util.express.js file
+ *
+ * file content like below:
+ *
+ *
+ * function setupRouterList(app, passdata) {
+ *
+ * const noticeRouter = require('./router/notice.router.js');
+ *
+ * const openRouter = require('./router/open.router.js');
+ *
+ * app.use('/notice', noticeRouter(passdata));
+ *
+ * app.use('/open', openRouter(passdata));
+ *
+ * }
+ *
+ * module.exports = {setupRouterList: setupRouterList};
  *
  * @param filename util.express.js is the default name
+ * @param logIt
  */
 function geneUtilExpressJs(
-    filename = 'util.express.js'
+    filename = null,
+    logIt = false,
 ) {
+  if (filename === null) {
+    filename = 'util.express.js'
+  }
 
-  writeTextToFile(filename)
+  writeTextToFile(filename, null, logIt);
 }
 
 module.exports = {
-  geneUtilExpressJs: geneUtilExpressJs
-}
+  geneUtilExpressJs: geneUtilExpressJs,
+};
