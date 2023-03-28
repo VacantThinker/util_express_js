@@ -1,8 +1,45 @@
 
 ## how to use ?
 
-#### in xxx.js
+#### dir
+```text
+router/
+  notice.router.js
+  open.router.js
+  
+xxx.js                  <===
+util.express.js
+```
 
+#### in xxx.js, --> node xxx.js --> generator util.express.js file
+```javascript
+geneUtilExpressJs()
+```
+
+#### util.express.js
+
+```javascript
+function setupRouterList(app, passdata) {
+  const noticeRouter = require('./router/notice.router.js');
+  const openRouter = require('./router/open.router.js');
+  app.use('/notice', noticeRouter(passdata));
+  app.use('/open', openRouter(passdata));
+}
+module.exports = {
+  setupRouterList: setupRouterList
+};
+```
+
+#### in your app.js (express)
+
+```javascript
+require('./util.express').setupRouterList(app, passdata);
+```
+
+---
+
+## works
+#### geneUtilExpressJs()
 ```javascript
 /**
  *
@@ -45,25 +82,6 @@ function geneUtilExpressJs(
 ) {}
 ```
 
-#### util.express.js
-
-```javascript
-function setupRouterList(app, passdata) {
-  const noticeRouter = require('./router/notice.router.js');
-  const openRouter = require('./router/open.router.js');
-  app.use('/notice', noticeRouter(passdata));
-  app.use('/open', openRouter(passdata));
-}
-module.exports = {
-  setupRouterList: setupRouterList
-};
-```
-
-#### in your app.js (express)
-
-```javascript
-require('./util.express').setupRouterList(app, passdata);
-```
 
 
 ---
