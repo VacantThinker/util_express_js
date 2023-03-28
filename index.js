@@ -42,7 +42,7 @@ function geneText(
       textArr.push(lineEnter);
     });
   };
-  textArr.pushItem(`function setupRouterList(app, passdata) {`);
+
   filenameList.forEach((filename) => {
     let reg = /.+(?=\.router\.js)/;
     let mat = filename.match(reg);
@@ -60,17 +60,22 @@ function geneText(
     let line2 = `app.use('/${routerName}', ${routerName}Router(passdata));`;
     textArr.pushItem(line2);
   });
-  textArr.pushItem(`}`);
-  textArr.pushItem(`module.exports = `);
-  textArr.pushItem(`{setupRouterList: setupRouterList}`);
 
   const reduce = textArr.reduce((str, value) => {
     return str.concat(value);
   }, '');
+
+  let textContainer =
+`'use strict';
+function setupRouterList(app, passdata) {${reduce}}
+module.exports = {
+  setupRouterList: setupRouterList,
+};`
+
   if (logIt) {
-    console.log(`reduce=\n`, reduce, `\n`);
+    console.log(`textContainer=\n`, textContainer, `\n`);
   }
-  return reduce;
+  return textContainer;
 }
 
 function getPath(pathRouter, filename) {
@@ -99,6 +104,7 @@ function findPathRouter(logIt = false) {
 }
 
 /**
+ * generator file 'util.express.js'
  *
  * @param pathRouter if null, findPathRouter()
  * @param logIt
