@@ -49,7 +49,7 @@ function geneText(
     let routerName = mat[0];
     const string_router = stringList.string_router;
     let line1 = `const ${routerName}Router = `;
-    let line2 = `require('./${string_router}/${filename}');`
+    let line2 = `require('./${string_router}/${filename}');`;
     textArr.pushItem(line1.concat(line2));
   });
   filenameList.forEach((filename) => {
@@ -62,7 +62,7 @@ function geneText(
   });
   textArr.pushItem(`}`);
   textArr.pushItem(`module.exports = `);
-  textArr.pushItem(`{setupRouterList: setupRouterList}`)
+  textArr.pushItem(`{setupRouterList: setupRouterList}`);
 
   const reduce = textArr.reduce((str, value) => {
     return str.concat(value);
@@ -73,21 +73,10 @@ function geneText(
   return reduce;
 }
 
-function writeTextToFile(
-    pathRouter,
-    logIt = false) {
-
-  const string_router = stringList.string_router
-  const filename = stringList.filename_util_express;
-  const data = geneText(pathRouter, logIt);
-  let pathFile = path.join(
-      pathRouter.replace(string_router, ''), filename);
-
-  if (logIt) {
-    console.log(`pathFile=\n`, pathFile, `\n`);
-  }
-
-  fs.writeFileSync(pathFile, data);
+function getPath(pathRouter, filename) {
+  let basename = path.basename(pathRouter);
+  let pathLevelUp = pathRouter.replace(basename, '');
+  return path.join(pathLevelUp, filename);
 }
 
 /**
@@ -111,37 +100,7 @@ function findPathRouter(logIt = false) {
 
 /**
  *
- * you must have router dir
- *
- * and your router file like this
- *
- * eg: router/user.router.js
- *
- *     router/xxxx.router.js
- *
- *
- * read router/ dir,
- *
- * gene util.express.js file
- *
- * file content like below:
- *
- *
- * function setupRouterList(app, passdata) {
- *
- * const noticeRouter = require('./router/notice.router.js');
- *
- * const openRouter = require('./router/open.router.js');
- *
- * app.use('/notice', noticeRouter(passdata));
- *
- * app.use('/open', openRouter(passdata));
- *
- * }
- *
- * module.exports = {setupRouterList: setupRouterList};
- *
- * @param pathRouter util.express.js is the default name
+ * @param pathRouter if null, findPathRouter()
  * @param logIt
  */
 function geneUtilExpressJs(
@@ -152,7 +111,10 @@ function geneUtilExpressJs(
     pathRouter = findPathRouter(logIt);
   }
 
-  writeTextToFile(pathRouter, logIt);
+  const data = geneText(pathRouter, logIt);
+  let pathFile = getPath(pathRouter, stringList.filename_util_express);
+  fs.writeFileSync(pathFile, data);
+
 }
 
 module.exports = {
