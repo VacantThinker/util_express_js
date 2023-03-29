@@ -9,23 +9,28 @@ express-project/
       notice.router.js
       open.router.js
   
-    util.express.js                     <=== (generator by xxx.js geneUtilExpressJs() )
+    util.express.js  <=== (generator by xxx.js geneUtilExpressJs() )
     app.js (const app = express() )
   
-  xxx.js                                <=== 
+  xxx.js  <=== (node xxx.js)
 ```
 
-#### in xxx.js, just run it ( node xxx.js ), it will gene util.express.js file
+#### in xxx.js
 ```javascript
 const {geneUtilExpressJs} = require('@vacantthinker/util_express_js');
-
 geneUtilExpressJs()
+```
 
+#### generator util.express.js
+```shell
+node xxx.js
 ```
 
 #### util.express.js
 
 ```javascript
+'use strict';
+
 function setupRouterList(app, passdata) {
   const noticeRouter = require('./router/notice.router.js');
   const openRouter = require('./router/open.router.js');
@@ -41,6 +46,9 @@ module.exports = {
 
 ```javascript
 require('./util.express').setupRouterList(app, passdata);
+app.listen(3000, async () => {
+  console.log(`running 3000`);
+});
 ```
 
 ---

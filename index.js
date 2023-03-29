@@ -10,78 +10,31 @@ const stringList = {
 };
 
 /**
- * read dir router/
+ * find dir/ level up
  *
- * router/
+ * eg: xxx-project/server/router/
  *
- * notice.router.js
+ * return xxx-project/server/
  *
- * open.router.js
- *
- * conver to -->
- *
- * const noticeRouter = require('./router/notice.router.js');
- *
- * app.use('/notice', noticeRouter(passdata));
- *
- *
- * @param pathRouter
- * @param logIt
- * @returns {*}
+ * @param pathTarget
+ * @param filename
+ * @returns {string}
  */
-function geneText(
-    pathRouter,
-    logIt = false) {
+function getPathByLevelUp(
+    pathTarget = null,
+    filename = null) {
 
-  let filenameList = fs.readdirSync(pathRouter);
-  const textArr = [];
-  let lineEnter = `\n`;
-  textArr.pushItem = function(...values) {
-    values.forEach((value) => {
-      textArr.push(value);
-      textArr.push(lineEnter);
-    });
-  };
-
-  filenameList.forEach((filename) => {
-    let reg = /.+(?=\.router\.js)/;
-    let mat = filename.match(reg);
-    let routerName = mat[0];
-    const string_router = stringList.string_router;
-    let line1 = `const ${routerName}Router = `;
-    let line2 = `require('./${string_router}/${filename}');`;
-    textArr.pushItem(line1.concat(line2));
-  });
-  filenameList.forEach((filename) => {
-    let reg = /.+(?=\.router\.js)/;
-    let mat = filename.match(reg);
-    let routerName = mat[0];
-
-    let line2 = `app.use('/${routerName}', ${routerName}Router(passdata));`;
-    textArr.pushItem(line2);
-  });
-
-  const reduce = textArr.reduce((str, value) => {
-    return str.concat(value);
-  }, '');
-
-  let textContainer =
-`'use strict';
-function setupRouterList(app, passdata) {${reduce}}
-module.exports = {
-  setupRouterList: setupRouterList,
-};`
-
-  if (logIt) {
-    console.log(`textContainer=\n`, textContainer, `\n`);
+  if (pathTarget === null) {
+    pathTarget = findPathTarget();
   }
-  return textContainer;
-}
 
-function getPath(pathRouter, filename) {
-  let basename = path.basename(pathRouter);
-  let pathLevelUp = pathRouter.replace(basename, '');
-  return path.join(pathLevelUp, filename);
+  const basename = path.basename(pathTarget);
+  const pathLevelUp = pathTarget.replace(basename, '');
+  if (filename === null) {
+    return pathLevelUp;
+  } else {
+    return path.join(pathLevelUp, filename);
+  }
 }
 
 /**
@@ -89,38 +42,92 @@ function getPath(pathRouter, filename) {
  *
  * return path.join(process.cwd(), 'server', 'router')
  *
- * @param logIt
  * @returns {string}
  */
-function findPathRouter(logIt = false) {
+function findPathTarget() {
   const pathRoot = process.cwd();
 
-  const pathRouter = path.join(pathRoot,
+  const pathTarget = path.join(pathRoot,
       stringList.string_server, stringList.string_router);
-  if (logIt) {
-    console.log(`pathRouter=\n`, pathRouter, `\n`);
-  }
-  return pathRouter;
+  console.log(`pathTarget=\n`, pathTarget, `\n`);
+  return pathTarget;
 }
 
 /**
+ * create an array, save text
+ * @param pathTarget
+ * @param callbacks
+ * @returns {*}
+ */
+function handleTextArr(pathTarget, ...callbacks) {
+  const textArr = [];
+
+  const filenameList = fs.readdirSync(pathTarget);
+  callbacks.forEach((callback) => {
+    filenameList.forEach((filename) => {
+      const text = callback(filename);
+      if (Array.isArray(text)) {
+        Array.from(text).forEach((value) => {
+          textArr.push(value);
+        });
+      } else {
+        textArr.push(text);
+      }
+    });
+  });
+
+  const reduce = textArr.reduce((str, value) => {
+    return str.concat(value);
+  }, '');
+  return reduce;
+}
+
+/**
+ *
+ * please make sure, you have router/ dir
+ *
+ * eg: router/notice.router.js
+ *
  * generator file 'util.express.js'
  *
- * @param pathRouter if null, findPathRouter()
- * @param logIt
+ * @param pathTarget if null, findPathTarget()
  */
 function geneUtilExpressJs(
-    pathRouter = null,
-    logIt = false,
+    pathTarget = null,
 ) {
-  if (pathRouter === null) {
-    pathRouter = findPathRouter(logIt);
+  if (pathTarget === null) {
+    pathTarget = findPathTarget();
   }
 
-  const data = geneText(pathRouter, logIt);
-  let pathFile = getPath(pathRouter, stringList.filename_util_express);
-  fs.writeFileSync(pathFile, data);
+  const dirName = stringList.string_router
+  const reduce = handleTextArr(pathTarget, (filename) => {
+    const reg = /.+(?=\.router\.js)/;
+    const mat = filename.match(reg);
+    const routerName = mat[0];
 
+    const line = `const ${routerName}Router = require('./${dirName}/${routerName}.router.js');
+  app.use('/${routerName}', ${routerName}Router(passdata));
+
+  `
+    return line
+  })
+
+  const text =
+`'use strict';
+
+function setupRouterList(app, passdata) {
+  ${reduce}
+}
+
+module.exports = {
+  setupRouterList: setupRouterList,
+};
+`
+
+  const file = getPathByLevelUp(pathTarget, stringList.filename_util_express);
+  fs.writeFileSync(file, text);
+  console.log(`file=\n`, file, `\n`);
+  console.log(`text=\n`, text, `\n`);
 }
 
 module.exports = {
